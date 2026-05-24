@@ -42,3 +42,22 @@ terraform.rc
 # Optional: ignore plan files saved before destroying Terraform configuration
 # Uncomment the line below if you want to ignore planout files.
 # planout
+
+# ==========================================
+# Doplnění pro VS Code, Docker a MobaXterm
+# ==========================================
+
+# Lokální konfigurace VS Code (může obsahovat tvé osobní cesty k SSH klíčům apod.)
+.vscode/
+
+# Vývojové soubory Dockeru a logy z testování aplikací
+*.log
+.docker/
+
+# Ignorování lokálních proměnných pro CI/CD (pokud by sis testoval pipeline lokálně)
+.env
+.env.local
+
+# Skryté soubory operačního systému (např. pokud bys na to koukal z Windows/macOS)
+.DS_Store
+Thumbs.db
