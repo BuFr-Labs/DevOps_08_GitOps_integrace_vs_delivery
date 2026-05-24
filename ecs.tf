@@ -22,19 +22,22 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
-# 3. Definice ukolu (Task Definition) pro Nginx kontejner
+# 3. Definice ukolu (Task Definition) pro Nginx kontejner z vlastniho ECR
 resource "aws_ecs_task_definition" "nginx" {
   family                   = "${var.project_name}-task"
   network_mode             = "awsvpc" # Fargate vyzaduje sitovy rezim awsvpc
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256" # Presne podle zadani
   memory                   = "512" # Presne podle zadani
+  
+  # Odkaz na IAM roli, ktera mi umozni stahnout image z ECR (reseno v iam.tf)
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   
   container_definitions = jsonencode([
     {
       name      = "nginx"
-      image     = "nginx:alpine" # Presne podle zadani
+      # Moje uprava: Odkazuji na URL adresu sveho vlastniho ECR registru misto Docker Hubu
+      image     = "${aws_ecr_repository.my_app_repo.repository_url}:latest"
       essential = true
       
       portMappings = [
