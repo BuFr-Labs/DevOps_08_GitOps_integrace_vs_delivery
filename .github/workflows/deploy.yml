@@ -1,0 +1,42 @@
+name: Build and Push to AWS ECR
+
+on:
+  push:
+    branches:
+      - main  # Pipeline se spusti pri kazdem pushi do vetve main
+
+jobs:
+  deploy:
+    name: Build and Push
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Krok: Stazeni kodu z repozitare na runner
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Krok: Nastaveni AWS prihlaseni pomoci secrets
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-central-1  # Frankfurt, kde mam vytvorene ECR
+
+    # 3. Krok: Prihlaseni Dockeru do AWS ECR
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    # 4. Krok: Build a Push Docker image do ECR
+    - name: Build, Tag, and Push Image to ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: devops08-homework-nginx
+        IMAGE_TAG: latest
+      run: |
+        # Sestaveni image s tagem odkazujicim na tve ECR
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        
+        # Odeslani image do tveho AWS repozitare
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
